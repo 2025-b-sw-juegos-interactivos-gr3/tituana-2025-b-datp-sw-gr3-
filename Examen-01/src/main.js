@@ -12,22 +12,22 @@ async function main() {
   const light1 = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
   light1.intensity = 0.7;
 
-  // Camera - Cámara orbital que sigue al personaje
+  // Camera - Cámara que sigue las espaldas del jugador
   const camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 5, -15), scene);
   
-  // Estado de la cámara orbital
+  // Estado de la cámara - sigue al jugador con offset limitado
   const cameraState = {
-    angle: 0,              // Ángulo horizontal alrededor del jugador
-    verticalAngle: 0.3,    // Ángulo vertical (inclinación)
-    distance: 15,          // Distancia al jugador
+    offsetAngle: 0,        // Offset horizontal (limitado) - mouse mueve esto
+    verticalAngle: 0.4,    // Ángulo vertical (inclinación)
+    distance: 12,          // Distancia al jugador
+    maxOffset: 0.8,        // Máximo giro permitido (en radianes, ~45 grados)
   };
   
-  // Control de cámara con mouse/trackpad - usando pointer events para mejor compatibilidad
+  // Control de cámara con mouse/trackpad
   let isPointerDown = false;
   let lastPointerX = 0;
   let lastPointerY = 0;
   
-  // Pointer events funcionan mejor en laptops con trackpad
   canvas.addEventListener('pointerdown', (e) => {
     isPointerDown = true;
     lastPointerX = e.clientX;
@@ -45,12 +45,13 @@ async function main() {
       const deltaX = e.clientX - lastPointerX;
       const deltaY = e.clientY - lastPointerY;
       
-      // Rotación horizontal
-      cameraState.angle += deltaX * 0.01;
+      // Rotación horizontal LIMITADA (solo offset, no giro completo)
+      cameraState.offsetAngle += deltaX * 0.008;
+      cameraState.offsetAngle = Math.max(-cameraState.maxOffset, Math.min(cameraState.maxOffset, cameraState.offsetAngle));
       
-      // Rotación vertical (con límites para no voltear la cámara)
-      cameraState.verticalAngle += deltaY * 0.01;
-      cameraState.verticalAngle = Math.max(0.1, Math.min(1.4, cameraState.verticalAngle));
+      // Rotación vertical (con límites)
+      cameraState.verticalAngle += deltaY * 0.008;
+      cameraState.verticalAngle = Math.max(0.2, Math.min(1.2, cameraState.verticalAngle));
       
       lastPointerX = e.clientX;
       lastPointerY = e.clientY;
@@ -61,12 +62,11 @@ async function main() {
     isPointerDown = false;
   });
   
-  // También permitir con rueda del mouse para zoom
+  // Zoom con rueda del mouse
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
     cameraState.distance += e.deltaY * 0.02;
-    // Limitar distancia
-    cameraState.distance = Math.max(5, Math.min(30, cameraState.distance));
+    cameraState.distance = Math.max(5, Math.min(20, cameraState.distance));
   }, { passive: false });
 
   // Ground
@@ -154,22 +154,55 @@ async function main() {
     });
   });
 
-  // Zones
-  const pickupZoneMat = new BABYLON.StandardMaterial('pickupZoneMat', scene);
-  pickupZoneMat.diffuseColor = new BABYLON.Color3(1, 1, 0);
-  pickupZoneMat.alpha = 0.3;
+  // ==================== FUNCIÓN PARA POSICIONES ALEATORIAS ====================
+  function getRandomPosition(minDist = 15) {
+    let x, z, valid;
+    do {
+      x = Math.random() * 100 - 50; // -50 a 50
+      z = Math.random() * 100 - 50;
+      valid = true;
+      
+      // No muy cerca del centro (spawn del jugador)
+      if (Math.sqrt(x*x + z*z) < minDist) valid = false;
+      
+      // No muy cerca de la casa de seguridad
+      if (Math.sqrt((x-45)**2 + (z-45)**2) < 15) valid = false;
+      
+      // No en obstáculos
+      for (let wall of obstacleConfigs) {
+        if (Math.abs(x - wall.x) < wall.width && Math.abs(z - wall.z) < wall.depth) {
+          valid = false;
+          break;
+        }
+      }
+    } while (!valid);
+    return { x, z };
+  }
 
-  const pickupZone = BABYLON.MeshBuilder.CreateGround('pickupZone', { width: 8, height: 8 }, scene);
-  pickupZone.position.set(0, 0.1, 0);
-  pickupZone.material = pickupZoneMat;
-
+  // ==================== CASA DE SEGURIDAD (DELIVERY) ====================
   const deliveryZoneMat = new BABYLON.StandardMaterial('deliveryZoneMat', scene);
-  deliveryZoneMat.diffuseColor = new BABYLON.Color3(0, 1, 0);
-  deliveryZoneMat.alpha = 0.3;
+  deliveryZoneMat.diffuseColor = new BABYLON.Color3(0, 1, 0.3);
+  deliveryZoneMat.emissiveColor = new BABYLON.Color3(0, 0.2, 0.1);
+  deliveryZoneMat.alpha = 0.5;
 
   const deliveryZone = BABYLON.MeshBuilder.CreateGround('deliveryZone', { width: 8, height: 8 }, scene);
-  deliveryZone.position.set(30, 0.1, 30);
+  deliveryZone.position.set(45, 0.1, 45);
   deliveryZone.material = deliveryZoneMat;
+
+  // Casa de seguridad (estructura simple)
+  const safehouse = BABYLON.MeshBuilder.CreateBox('safehouse', { width: 6, height: 4, depth: 6 }, scene);
+  safehouse.position.set(45, 2, 45);
+  const safehouseMat = new BABYLON.StandardMaterial('safehouseMat', scene);
+  safehouseMat.diffuseColor = new BABYLON.Color3(0.3, 0.5, 0.3);
+  safehouse.material = safehouseMat;
+  
+  // Techo de la casa
+  const roof = BABYLON.MeshBuilder.CreateCylinder('roof', { diameter: 10, height: 2, tessellation: 4 }, scene);
+  roof.position.set(45, 5, 45);
+  roof.rotation.y = Math.PI / 4;
+  const roofMat = new BABYLON.StandardMaterial('roofMat', scene);
+  roofMat.diffuseColor = new BABYLON.Color3(0.6, 0.2, 0.1);
+  roof.material = roofMat;
 
   // Trees
   for (let i = 0; i < 12; i++) {
@@ -206,13 +239,50 @@ async function main() {
     });
   });
 
-  // Briefcase
-  const briefcase = BABYLON.MeshBuilder.CreateBox('briefcase', { width: 0.4, height: 0.3, depth: 0.2 }, scene);
-  briefcase.position = new BABYLON.Vector3(0, 0.5, 0);
+  // ==================== 3 MALETINES SECRETOS ====================
+  const briefcases = [];
+  const briefcaseColors = [
+    new BABYLON.Color3(0.3, 0.15, 0.05),  // Marrón
+    new BABYLON.Color3(0.1, 0.1, 0.1),     // Negro
+    new BABYLON.Color3(0.5, 0.3, 0.1)      // Marrón claro
+  ];
   
-  const briefcaseMat = new BABYLON.StandardMaterial('briefcaseMat', scene);
-  briefcaseMat.diffuseColor = new BABYLON.Color3(0.2, 0.1, 0);
-  briefcase.material = briefcaseMat;
+  for (let i = 0; i < 3; i++) {
+    const pos = getRandomPosition(20);
+    
+    const briefcase = BABYLON.MeshBuilder.CreateBox(`briefcase_${i}`, { width: 0.6, height: 0.4, depth: 0.3 }, scene);
+    briefcase.position = new BABYLON.Vector3(pos.x, 0.5, pos.z);
+    
+    const briefcaseMat = new BABYLON.StandardMaterial(`briefcaseMat_${i}`, scene);
+    briefcaseMat.diffuseColor = briefcaseColors[i];
+    briefcaseMat.specularColor = new BABYLON.Color3(0.5, 0.4, 0.3);
+    briefcaseMat.emissiveColor = briefcaseColors[i].scale(0.2);
+    briefcase.material = briefcaseMat;
+    
+    // Asa del maletín
+    const handle = BABYLON.MeshBuilder.CreateTorus(`handle_${i}`, { diameter: 0.2, thickness: 0.03 }, scene);
+    handle.parent = briefcase;
+    handle.position.y = 0.25;
+    handle.rotation.x = Math.PI / 2;
+    handle.material = briefcaseMat;
+    
+    // Marcador brillante sobre el maletín
+    const marker = BABYLON.MeshBuilder.CreateSphere(`marker_${i}`, { diameter: 0.3 }, scene);
+    marker.parent = briefcase;
+    marker.position.y = 0.8;
+    const markerMat = new BABYLON.StandardMaterial(`markerMat_${i}`, scene);
+    markerMat.diffuseColor = new BABYLON.Color3(1, 1, 0);
+    markerMat.emissiveColor = new BABYLON.Color3(1, 0.8, 0);
+    marker.material = markerMat;
+    
+    briefcases.push({
+      mesh: briefcase,
+      marker: marker,
+      collected: false,
+      delivered: false,
+      originalPos: new BABYLON.Vector3(pos.x, 0.5, pos.z)
+    });
+  }
 
   // Input
   const inputState = { moveX: 0, moveZ: 0, isMoving: false };
@@ -244,12 +314,17 @@ async function main() {
     if (key === 'k' || key === 'K') keys.k = isKeyDown;
   });
 
-  // Game state
+  // Game state - Espía Internacional (3 maletines, 60 segundos)
   const gameState = {
-    briefcaseInHand: false,
-    briefcaseDelivered: false,
-    canPickup: false,
-    canDeliver: false
+    briefcasesInHand: [],      // Array de maletines recogidos
+    briefcasesDelivered: 0,    // Contador de entregados
+    canPickup: null,           // Índice del maletín cercano (o null)
+    canDeliver: false,
+    missionComplete: false,
+    missionFailed: false,
+    timeRemaining: 60,         // 60 segundos
+    timerStarted: false,
+    lastTime: Date.now()
   };
 
   const playerSpeed = 0.15;
@@ -259,41 +334,31 @@ async function main() {
     inputState.moveZ = 0;
     inputState.isMoving = false;
 
-    // Movimiento relativo a la cámara
-    let forwardX = 0, forwardZ = 0;
-    let rightX = 0, rightZ = 0;
-
+    // Movimiento relativo al personaje (estilo tercera persona)
+    // W = adelante (hacia donde mira el personaje)
+    // S = atrás
+    // A/D = rotar el personaje
+    
     if (keys.w || keys.ArrowUp) {
-      forwardZ = 1;
+      // Mover hacia adelante en la dirección que mira el personaje
+      inputState.moveX = Math.sin(player.rotation.y) * playerSpeed;
+      inputState.moveZ = Math.cos(player.rotation.y) * playerSpeed;
       inputState.isMoving = true;
     }
     if (keys.s || keys.ArrowDown) {
-      forwardZ = -1;
+      // Mover hacia atrás
+      inputState.moveX = -Math.sin(player.rotation.y) * playerSpeed * 0.6;
+      inputState.moveZ = -Math.cos(player.rotation.y) * playerSpeed * 0.6;
       inputState.isMoving = true;
     }
     if (keys.a || keys.ArrowLeft) {
-      rightX = -1;
-      inputState.isMoving = true;
+      // Rotar a la izquierda
+      player.rotation.y -= 0.05;
     }
     if (keys.d || keys.ArrowRight) {
-      rightX = 1;
-      inputState.isMoving = true;
+      // Rotar a la derecha
+      player.rotation.y += 0.05;
     }
-
-    // Transformar movimiento según el ángulo de la cámara
-    const camAngle = cameraState.angle;
-    
-    // Calcular dirección adelante/atrás relativa a la cámara
-    const moveForwardX = Math.sin(camAngle) * forwardZ;
-    const moveForwardZ = Math.cos(camAngle) * forwardZ;
-    
-    // Calcular dirección izquierda/derecha relativa a la cámara
-    const moveRightX = Math.cos(camAngle) * rightX;
-    const moveRightZ = -Math.sin(camAngle) * rightX;
-    
-    // Combinar movimientos
-    inputState.moveX = (moveForwardX + moveRightX) * playerSpeed;
-    inputState.moveZ = (moveForwardZ + moveRightZ) * playerSpeed;
 
     return inputState.isMoving;
   }
@@ -313,29 +378,22 @@ async function main() {
   }
 
   function updatePlayerRotation() {
-    if (inputState.isMoving && (inputState.moveX !== 0 || inputState.moveZ !== 0)) {
-      // Calcular la dirección de movimiento y rotar el personaje hacia ella
-      const targetRotation = Math.atan2(inputState.moveX, inputState.moveZ);
-      
-      const currentRotation = player.rotation.y;
-      let diff = targetRotation - currentRotation;
-
-      if (diff > Math.PI) diff -= 2 * Math.PI;
-      if (diff < -Math.PI) diff += 2 * Math.PI;
-
-      player.rotation.y = currentRotation + diff * 0.2;
-    }
+    // La rotación ahora se maneja directamente en updateMovementInput con A/D
+    // Esta función queda vacía pero se mantiene por compatibilidad
   }
 
   function updateHUD() {
     const statusDiv = document.getElementById('status');
     const objectiveUl = document.querySelector('#objective ul');
     
-    if (gameState.briefcaseInHand) {
-      statusDiv.textContent = '🕵️ ESTADO: MALETÍN EN MANO - Diríjete a la casa de seguridad';
-      statusDiv.style.color = '#ff0000';
-    } else if (gameState.briefcaseDelivered) {
-      statusDiv.textContent = '✓ MISIÓN COMPLETADA - ¡Maletín entregado en la casa de seguridad!';
+    // Mostrar temporizador
+    const minutes = Math.floor(gameState.timeRemaining / 60);
+    const seconds = Math.floor(gameState.timeRemaining % 60);
+    const timeStr = `⏱️ ${minutes}:${seconds.toString().padStart(2, '0')}`;
+    const progressStr = `📦 ${gameState.briefcasesDelivered}/3 entregados | 🎒 ${gameState.briefcasesInHand.length} en mano`;
+    
+    if (gameState.missionComplete) {
+      statusDiv.innerHTML = `🏆 ¡MISIÓN COMPLETADA! Los 3 maletines entregados<br>${timeStr} restante`;
       statusDiv.style.color = '#00ff00';
       
       if (objectiveUl) {
@@ -348,10 +406,30 @@ async function main() {
         if (victoryScreen) {
           victoryScreen.classList.remove('hidden');
         }
+      }, 1500);
+    } else if (gameState.missionFailed) {
+      statusDiv.innerHTML = `💀 ¡TIEMPO AGOTADO! Solo entregaste ${gameState.briefcasesDelivered}/3 maletines`;
+      statusDiv.style.color = '#ff0000';
+      
+      setTimeout(() => {
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        if (gameOverScreen) {
+          gameOverScreen.classList.remove('hidden');
+        }
       }, 1000);
-    } else {
-      statusDiv.textContent = '🎯 ESTADO: Busca el maletín secreto - Zona de recogida marcada en AMARILLO';
+    } else if (gameState.briefcasesInHand.length > 0 && gameState.canDeliver) {
+      statusDiv.innerHTML = `${timeStr} | ${progressStr}<br>🏠 Presiona E para entregar ${gameState.briefcasesInHand.length} maletín(es)`;
+      statusDiv.style.color = '#00ff00';
+    } else if (gameState.briefcasesInHand.length > 0) {
+      statusDiv.innerHTML = `${timeStr} | ${progressStr}<br>🕵️ ¡Ve a la CASA DE SEGURIDAD (edificio verde)!`;
+      statusDiv.style.color = '#ff6600';
+    } else if (gameState.canPickup !== null) {
+      statusDiv.innerHTML = `${timeStr} | ${progressStr}<br>📦 ¡Maletín encontrado! Presiona ESPACIO para recogerlo`;
       statusDiv.style.color = '#ffff00';
+    } else {
+      const remaining = 3 - gameState.briefcasesDelivered - gameState.briefcasesInHand.length;
+      statusDiv.innerHTML = `${timeStr} | ${progressStr}<br>🎯 Encuentra los ${remaining} maletines restantes`;
+      statusDiv.style.color = '#ffffff';
     }
   }
 
@@ -371,40 +449,113 @@ async function main() {
 
     updatePlayerRotation();
 
-    // Rotar cámara con L y K
-    if (keys.l) cameraState.angle -= 0.03;
-    if (keys.k) cameraState.angle += 0.03;
+    // Mover offset de cámara con L y K (limitado)
+    if (keys.l) {
+      cameraState.offsetAngle -= 0.03;
+      cameraState.offsetAngle = Math.max(-cameraState.maxOffset, cameraState.offsetAngle);
+    }
+    if (keys.k) {
+      cameraState.offsetAngle += 0.03;
+      cameraState.offsetAngle = Math.min(cameraState.maxOffset, cameraState.offsetAngle);
+    }
 
-    // La cámara sigue al personaje en órbita esférica
+    // Cámara sigue las ESPALDAS del jugador + offset limitado del mouse
+    const playerAngle = player.rotation.y;
+    const finalCameraAngle = playerAngle + cameraState.offsetAngle + Math.PI; // +PI para estar detrás
+    
     const horizontalDistance = Math.cos(cameraState.verticalAngle) * cameraState.distance;
     const verticalHeight = Math.sin(cameraState.verticalAngle) * cameraState.distance;
     
-    camera.position.x = player.position.x + Math.sin(cameraState.angle) * horizontalDistance;
-    camera.position.z = player.position.z - Math.cos(cameraState.angle) * horizontalDistance;
+    camera.position.x = player.position.x + Math.sin(finalCameraAngle) * horizontalDistance;
+    camera.position.z = player.position.z + Math.cos(finalCameraAngle) * horizontalDistance;
     camera.position.y = player.position.y + verticalHeight;
     
     camera.setTarget(new BABYLON.Vector3(player.position.x, player.position.y + 1, player.position.z));
 
-    // Proximity detection
-    const distToBriefcase = BABYLON.Vector3.Distance(player.position, briefcase.position);
-    gameState.canPickup = distToBriefcase < 3 && !gameState.briefcaseInHand;
-
-    const distToDelivery = BABYLON.Vector3.Distance(player.position, deliveryZone.position);
-    gameState.canDeliver = distToDelivery < 3 && gameState.briefcaseInHand;
-
-    // Handle pickup/delivery
-    if (keys.space && gameState.canPickup && !gameState.briefcaseInHand) {
-      briefcase.parent = player;
-      briefcase.position = new BABYLON.Vector3(0.2, -0.3, 0);
-      gameState.briefcaseInHand = true;
+    // ==================== TEMPORIZADOR ====================
+    if (!gameState.missionComplete && !gameState.missionFailed) {
+      if (!gameState.timerStarted) {
+        gameState.timerStarted = true;
+        gameState.lastTime = Date.now();
+      }
+      
+      const now = Date.now();
+      const deltaTime = (now - gameState.lastTime) / 1000;
+      gameState.lastTime = now;
+      gameState.timeRemaining -= deltaTime;
+      
+      if (gameState.timeRemaining <= 0) {
+        gameState.timeRemaining = 0;
+        gameState.missionFailed = true;
+      }
     }
-
-    if (keys.e && gameState.canDeliver && gameState.briefcaseInHand) {
-      briefcase.parent = null;
-      briefcase.position = deliveryZone.position.clone();
-      briefcase.position.y = 0.5;
-      gameState.briefcaseInHand = false;
-      gameState.briefcaseDelivered = true;
+    
+    // ==================== LÓGICA DE LOS 3 MALETINES ====================
+    if (!gameState.missionComplete && !gameState.missionFailed) {
+      // Resetear canPickup
+      gameState.canPickup = null;
+      
+      // Animar maletines no recogidos y detectar proximidad
+      for (let i = 0; i < briefcases.length; i++) {
+        const bc = briefcases[i];
+        if (!bc.collected && !bc.delivered) {
+          // Animación flotante
+          bc.mesh.position.y = bc.originalPos.y + Math.sin(Date.now() * 0.003 + i) * 0.15;
+          bc.mesh.rotation.y += 0.015;
+          bc.marker.scaling.setAll(0.8 + Math.sin(Date.now() * 0.005) * 0.2);
+          
+          // Detectar proximidad
+          const dist = BABYLON.Vector3.Distance(player.position, bc.mesh.position);
+          if (dist < 2.5) {
+            gameState.canPickup = i;
+          }
+        }
+      }
+      
+      // Recoger maletín con ESPACIO
+      if (keys.space && gameState.canPickup !== null) {
+        const bc = briefcases[gameState.canPickup];
+        bc.collected = true;
+        bc.marker.isVisible = false;
+        gameState.briefcasesInHand.push(gameState.canPickup);
+        
+        // Adjuntar al jugador
+        bc.mesh.parent = player;
+        const offset = gameState.briefcasesInHand.length - 1;
+        bc.mesh.position = new BABYLON.Vector3(0.3 + offset * 0.2, 0.5 + offset * 0.3, -offset * 0.2);
+        bc.mesh.rotation.y = 0;
+        
+        keys.space = false; // Prevenir recoger múltiples en un frame
+      }
+      
+      // Detectar casa de seguridad
+      const distToSafehouse = BABYLON.Vector3.Distance(player.position, deliveryZone.position);
+      gameState.canDeliver = distToSafehouse < 6 && gameState.briefcasesInHand.length > 0;
+      
+      // Entregar maletines con E
+      if (keys.e && gameState.canDeliver) {
+        // Entregar TODOS los maletines en mano
+        for (let idx of gameState.briefcasesInHand) {
+          const bc = briefcases[idx];
+          bc.delivered = true;
+          bc.mesh.parent = null;
+          bc.mesh.position = new BABYLON.Vector3(
+            45 + (gameState.briefcasesDelivered % 2) * 1.5 - 0.75,
+            1 + Math.floor(gameState.briefcasesDelivered / 2) * 0.5,
+            45
+          );
+          bc.mesh.rotation.y = 0;
+          gameState.briefcasesDelivered++;
+        }
+        gameState.briefcasesInHand = [];
+        
+        // Verificar victoria
+        if (gameState.briefcasesDelivered >= 3) {
+          gameState.missionComplete = true;
+        }
+        
+        keys.e = false;
+      }
     }
 
     // Update HUD
@@ -431,7 +582,7 @@ async function main() {
 
   // Menu buttons
   const startButton = document.querySelector('.start-button');
-  const restartButton = document.querySelector('.restart-button');
+  const restartButtons = document.querySelectorAll('.restart-button');
   
   if (startButton) {
     startButton.addEventListener('click', () => {
@@ -439,11 +590,13 @@ async function main() {
       if (mainMenu) mainMenu.classList.add('hidden');
     });
   }
-  if (restartButton) {
-    restartButton.addEventListener('click', () => {
+  
+  // Todos los botones de reintentar (victoria y game over)
+  restartButtons.forEach(button => {
+    button.addEventListener('click', () => {
       window.location.reload();
     });
-  }
+  });
 }
 
 main().catch(err => console.error('Game initialization error:', err));

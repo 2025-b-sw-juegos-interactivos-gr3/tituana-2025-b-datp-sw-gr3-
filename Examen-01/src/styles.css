@@ -293,3 +293,64 @@ html, body {
   box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
   transform: scale(1.05);
 }
+
+/* Pantalla de Game Over */
+#gameOverScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #3a1a1a 0%, #2a0f0f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  flex-direction: column;
+}
+
+#gameOverScreen.hidden {
+  display: none;
+}
+
+.gameover-content {
+  text-align: center;
+  color: #ff4444;
+  font-family: 'Courier New', monospace;
+  border: 3px solid #ff4444;
+  padding: 40px;
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 30px rgba(255, 68, 68, 0.9);
+  border-radius: 10px;
+  max-width: 600px;
+  animation: pulseDanger 1.5s infinite;
+}
+
+@keyframes pulseDanger {
+  0%, 100% { box-shadow: 0 0 30px rgba(255, 68, 68, 0.9); }
+  50% { box-shadow: 0 0 50px rgba(255, 68, 68, 1); }
+}
+
+.gameover-content h1 {
+  font-size: 56px;
+  margin-bottom: 20px;
+  text-shadow: 0 0 15px #ff4444;
+  letter-spacing: 3px;
+  color: #ff6666;
+}
+
+.gameover-content p {
+  font-size: 20px;
+  margin: 15px 0;
+  line-height: 1.8;
+  color: #ffcccc;
+}
+
+.gameover-content .restart-button {
+  background: #ff4444;
+}
+
+.gameover-content .restart-button:hover {
+  background: #ff6666;
+  box-shadow: 0 0 15px rgba(255, 68, 68, 0.8);
+}
