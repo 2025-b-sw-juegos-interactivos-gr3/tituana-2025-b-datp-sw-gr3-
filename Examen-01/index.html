@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Examen 01 - Espía Internacional: Recoge y Entrega</title>
+</head>
+<body>
+  <canvas id="renderCanvas"></canvas>
+  
+  <!-- Menú de Inicio -->
+  <div id="mainMenu">
+    <div class="menu-content">
+      <h1>🕵️ ESPÍA INTERNACIONAL</h1>
+      <p>Misión Secreta: Recoge el Maletín y Entregalo</p>
+      
+      <h2>🎮 Objetivo del Juego</h2>
+      <p>Tu misión es infiltrarte en el laberinto, encontrar el maletín secreto (zona AMARILLA) y entregarlo en la casa de seguridad (zona VERDE). ¡Debes navegar el laberinto sin ser detectado!</p>
+      
+      <h2>⌨️ Controles</h2>
+      <div class="controls-list">
+        <p><span class="control-key">W / ↑</span> - Mover Adelante</p>
+        <p><span class="control-key">S / ↓</span> - Mover Atrás</p>
+        <p><span class="control-key">A / ←</span> - Mover Izquierda</p>
+        <p><span class="control-key">D / →</span> - Mover Derecha</p>
+        <p><span class="control-key">ESPACIO / E</span> - Recoger/Entregar Maletín</p>
+        <p><span class="control-key">Ratón Click + Arrastrar</span> - Rotar Cámara</p>
+      </div>
+      
+      <button class="start-button">Comenzar Misión</button>
+    </div>
+  </div>
+
+  <!-- Pantalla de Victoria -->
+  <div id="victoryScreen" class="hidden">
+    <div class="victory-content">
+      <h1>✓ ¡MISIÓN COMPLETADA!</h1>
+      <p>¡Felicidades! Has entregado exitosamente el maletín secreto en la casa de seguridad.</p>
+      <p style="color: #ffff00; font-size: 18px; margin-top: 20px;">Has demostrado ser un espía de élite.</p>
+      <button class="restart-button">Nueva Misión</button>
+    </div>
+  </div>
+  
+  <!-- HUD - Information Panel -->
+  <div id="hud">
+    <h2>🕵️ ESPÍA INTERNACIONAL</h2>
+    <p><strong>Misión Secreta:</strong> Recoge el maletín y entregalo en la casa de seguridad</p>
+    <div id="status">🎯 ESTADO: Busca el maletín secreto</div>
+  </div>
+
+  <!-- Objective Panel -->
+  <div id="objective">
+    <h3>📋 Objetivos</h3>
+    <ul>
+      <li>Recoge el maletín secreto (AMARILLO)</li>
+      <li>Entregalo en la casa de seguridad (VERDE)</li>
+    </ul>
+  </div>
+
+  <!-- Instructions Panel -->
+  <div id="instructions">
+    <h3>⌨️ Controles</h3>
+    <p><span class="key">W</span> <span class="key">A</span> <span class="key">S</span> <span class="key">D</span> - Mover</p>
+    <p><span class="key">↑</span> <span class="key">←</span> <span class="key">↓</span> <span class="key">→</span> - Mover (Alternativo)</p>
+    <p><span class="key">ESPACIO</span> / <span class="key">E</span> - Recoger/Entregar</p>
+    <p style="margin-top: 10px; border-top: 1px solid #00ff00; padding-top: 10px;">
+      🖱️ <strong>Ratón:</strong><br>
+      • Click + Arrastrar - Rotar cámara
+    </p>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
