@@ -1,0 +1,437 @@
+/* ============================================
+   JUMP KING - ESTILOS PRINCIPALES
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+    background: url('../assets/Fondo.jpg') center/cover no-repeat;
+    background-attachment: fixed;
+    font-family: 'Arial', sans-serif;
+    gap: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ============================================
+   CONTENEDOR DEL JUEGO
+   ============================================ */
+
+#gameWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+#gameContainer {
+    position: relative;
+    width: 500px;
+    height: 800px;
+    background-size: cover;
+    background-position: center;
+    border: 3px solid #333;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+    z-index: 5;
+}
+
+/* Backgrounds de Niveles */
+#gameContainer.level1 {
+    background-image: url('../assets/Nivel 1.jpg');
+}
+
+#gameContainer.level2 {
+    background-image: url('../assets/Nivel 2.jpg');
+}
+
+#gameContainer.level3 {
+    background-image: url('../assets/Nivel 3.jpg');
+}
+
+#gameContainer.level4 {
+    background-image: url('../assets/Nivel 4.jpg');
+}
+
+#gameContainer.level5 {
+    background-image: url('../assets/Nivel 5.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#gameContainer.level6 {
+    background-image: url('../assets/Nivel 6.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#gameContainer.level7 {
+    background-image: url('../assets/Nivel 7.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#gameContainer.level8 {
+    background-image: url('../assets/Nivel 8.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#gameContainer.level9 {
+    background-image: url('../assets/Nivel 9.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#gameContainer.level10 {
+    background: linear-gradient(to bottom, #1a0a2e, #16213e);
+}
+
+/* ============================================
+   PERSONAJE
+   ============================================ */
+
+#player {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background-image: url('../assets/Personaje.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    left: 210px;
+    top: 650px;
+    z-index: 10;
+    filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.6));
+    transition: filter 0.3s ease;
+}
+
+/* ============================================
+   PLATAFORMAS
+   ============================================ */
+
+.platform {
+    position: absolute;
+    border: 2px solid;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Colores de plataformas por nivel */
+#gameContainer.level1 .platform {
+    background: #CD853F;
+    border-color: #8B4513;
+}
+
+#gameContainer.level2 .platform {
+    background: #5C4033;
+    border-color: #3E2723;
+}
+
+#gameContainer.level3 .platform {
+    background: #00CED1;
+    border-color: #0099CC;
+    box-shadow: 0 0 15px rgba(0, 206, 209, 0.6), 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#gameContainer.level4 .platform {
+    background: #4A4A4A;
+    border-color: #2A2A2A;
+}
+
+#gameContainer.level5 .platform {
+    background: #228B22;
+    border-color: #1a5c1a;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#gameContainer.level6 .platform {
+    background: #8A2BE2;
+    border-color: #4B0082;
+    box-shadow: 0 0 12px rgba(138, 43, 226, 0.5), 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#gameContainer.level7 .platform {
+    background: #87CEEB;
+    border-color: #4A90E2;
+}
+
+#gameContainer.level8 .platform {
+    background: #FFD700;
+    border-color: #FFA500;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.6), 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#gameContainer.level9 .platform {
+    background: #9370DB;
+    border-color: #6A5ACD;
+    box-shadow: 0 0 15px rgba(147, 112, 219, 0.5), 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#gameContainer.level10 .platform {
+    background: #00FF00;
+    border-color: #00AA00;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.8), 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   HUD (Head-Up Display)
+   ============================================ */
+
+#hud {
+    position: relative;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.95) 0%, rgba(255, 165, 0, 0.95) 100%);
+    padding: 18px 35px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 -2px 5px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial Black', Arial, sans-serif;
+    display: flex;
+    gap: 40px;
+    border: 3px solid #FFD700;
+    background-attachment: fixed;
+    letter-spacing: 1px;
+    z-index: 20;
+}
+
+.hud-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 18px;
+    gap: 20px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.hud-label {
+    color: #333;
+    font-weight: 900;
+}
+
+.hud-value {
+    color: #FF0000;
+    font-weight: 900;
+    font-size: 24px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+    min-width: 40px;
+    text-align: center;
+}
+
+/* ============================================
+   MENÚ PRINCIPAL
+   ============================================ */
+
+#mainMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.menu-container {
+    text-align: center;
+    background: rgba(15, 12, 41, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 60px 50px;
+    border-radius: 25px;
+    border: 3px solid #FFD700;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.3);
+    animation: slideInMenu 0.5s ease-out;
+}
+
+@keyframes slideInMenu {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.menu-title {
+    font-size: 60px;
+    font-weight: bold;
+    color: #FFD700;
+    margin-bottom: 10px;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+}
+
+.menu-subtitle {
+    font-size: 20px;
+    color: #FF6B6B;
+    margin-bottom: 40px;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.menu-btn {
+    padding: 15px 40px;
+    font-size: 18px;
+    font-weight: bold;
+    border: 2px solid #FFD700;
+    background: #4CAF50;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 200px;
+}
+
+.menu-btn:hover {
+    background: #45a049;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+}
+
+.menu-info {
+    margin-top: 30px;
+    font-size: 14px;
+    color: #87CEEB;
+    max-width: 400px;
+}
+
+/* ============================================
+   MODAL DE INSTRUCCIONES
+   ============================================ */
+
+#instructionsModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 2100;
+}
+
+.instructions-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    border: 3px solid #FFD700;
+    max-width: 500px;
+    color: white;
+}
+
+.instructions-content h2 {
+    color: #FFD700;
+    margin-bottom: 20px;
+    font-size: 32px;
+}
+
+.instructions-content p {
+    color: #E0E0E0;
+    margin: 12px 0;
+    line-height: 1.6;
+}
+
+.instructions-content button {
+    margin-top: 20px;
+    padding: 12px 30px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.instructions-content button:hover {
+    background: #45a049;
+}
+
+/* ============================================
+   PANTALLA GAME OVER
+   ============================================ */
+
+#gameOver {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 1000;
+    display: none;
+    font-size: 24px;
+    border: 3px solid #FF6B6B;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+#gameOver h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #FF6B6B;
+}
+
+#finalScore {
+    font-size: 18px;
+    margin: 15px 0;
+    background: rgba(255, 107, 107, 0.2);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#gameOver button {
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 16px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+#gameOver button:hover {
+    background: #45a049;
+    transform: scale(1.05);
+}

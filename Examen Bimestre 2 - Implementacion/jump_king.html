@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jump King</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: url('Fondo.jpg') center/cover no-repeat;
+            background-attachment: fixed;
+            font-family: 'Arial', sans-serif;
+            gap: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #gameWrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 500px;
+            height: 800px;
+            background-size: cover;
+            background-position: center;
+            border: 3px solid #333;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        #gameContainer.level1 {
+            background-image: url('Nivel 1.jpg');
+        }
+
+        #gameContainer.level2 {
+            background-image: url('Nivel 2.jpg');
+        }
+
+        #gameContainer.level3 {
+            background-image: url('Nivel 3.jpg');
+        }
+
+        #gameContainer.level4 {
+            background-image: url('Nivel 4.jpg');
+        }
+
+        #gameContainer.level5 {
+            background-image: url('Nivel 5.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        #gameContainer.level6 {
+            background-image: url('Nivel 6.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        #gameContainer.level7 {
+            background-image: url('Nivel 7.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        #gameContainer.level8 {
+            background-image: url('Nivel 8.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        #gameContainer.level9 {
+            background-image: url('Nivel 9.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        #gameContainer.level10 {
+            background: linear-gradient(to bottom, #1a0a2e, #16213e);
+        }
+
+        #player {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background-image: url('Personaje.webp');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            left: 210px;
+            top: 650px;
+            z-index: 10;
+            filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.6));
+            transition: filter 0.3s ease;
+        }
+
+        .platform {
+            position: absolute;
+            border: 2px solid;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* MENÚ PRINCIPAL */
+        #mainMenu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .menu-container {
+            text-align: center;
+            background: rgba(15, 12, 41, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 60px 50px;
+            border-radius: 25px;
+            border: 3px solid #FFD700;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.3);
+            animation: slideInMenu 0.5s ease-out;
+        }
+
+        @keyframes slideInMenu {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .menu-title {
+            font-size: 60px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+        }
+
+        .menu-subtitle {
+            font-size: 20px;
+            color: #FF6B6B;
+            margin-bottom: 40px;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .menu-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #FFD700;
+            background: #4CAF50;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 200px;
+        }
+
+        .menu-btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+        }
+
+        .menu-info {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #87CEEB;
+            max-width: 400px;
+        }
+
+        #instructionsModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2100;
+        }
+
+        .instructions-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            border: 3px solid #FFD700;
+            max-width: 500px;
+            color: white;
+        }
+
+        .instructions-content h2 {
+            color: #FFD700;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .instructions-content p {
+            color: #E0E0E0;
+            margin: 12px 0;
+            line-height: 1.6;
+        }
+
+        .instructions-content button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .instructions-content button:hover {
+            background: #45a049;
+        }
+
+        /* Nivel 1 - Madera medieval naranja/marrón */
+        #gameContainer.level1 .platform {
+            background: #CD853F;
+            border-color: #8B4513;
+        }
+
+        /* Nivel 2 - Madera oscura gris */
+        #gameContainer.level2 .platform {
+            background: #5C4033;
+            border-color: #3E2723;
+        }
+
+        /* Nivel 3 - Cristal azul/cyan bioluminiscente */
+        #gameContainer.level3 .platform {
+            background: #00CED1;
+            border-color: #0099CC;
+            box-shadow: 0 0 15px rgba(0, 206, 209, 0.6), 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Nivel 4 - Piedra gris oscura gótica */
+        #gameContainer.level4 .platform {
+            background: #4A4A4A;
+            border-color: #2A2A2A;
+        }
+
+        /* Nivel 5 - Verde bioluminiscente naturaleza */
+        #gameContainer.level5 .platform {
+            background: #228B22;
+            border-color: #1a5c1a;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Nivel 6 - Púrpura mágico arcano */
+        #gameContainer.level6 .platform {
+            background: #8A2BE2;
+            border-color: #4B0082;
+            box-shadow: 0 0 12px rgba(138, 43, 226, 0.5), 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Nivel 7 - Azul cielo claro */
+        #gameContainer.level7 .platform {
+            background: #87CEEB;
+            border-color: #4A90E2;
+        }
+
+        /* Nivel 8 - Oro divino luminoso */
+        #gameContainer.level8 .platform {
+            background: #FFD700;
+            border-color: #FFA500;
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.6), 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Nivel 9 - Cósmico púrpura-azul */
+        #gameContainer.level9 .platform {
+            background: #9370DB;
+            border-color: #6A5ACD;
+            box-shadow: 0 0 15px rgba(147, 112, 219, 0.5), 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Nivel 10 - Verde caótico luminiscente */
+        #gameContainer.level10 .platform {
+            background: #00FF00;
+            border-color: #00AA00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8), 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        #hud {
+            position: relative;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.95) 0%, rgba(255, 165, 0, 0.95) 100%);
+            padding: 18px 35px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 -2px 5px rgba(0, 0, 0, 0.1);
+            font-family: 'Arial Black', Arial, sans-serif;
+            display: flex;
+            gap: 40px;
+            border: 3px solid #FFD700;
+            background-attachment: fixed;
+            letter-spacing: 1px;
+        }
+
+        .hud-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            gap: 20px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .hud-label {
+            color: #333;
+            font-weight: 900;
+        }
+
+        .hud-value {
+            color: #FF0000;
+            font-weight: 900;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+            min-width: 40px;
+            text-align: center;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            font-size: 24px;
+            border: 3px solid #FF6B6B;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        #gameOver h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #FF6B6B;
+        }
+
+        #finalScore {
+            font-size: 18px;
+            margin: 15px 0;
+            background: rgba(255, 107, 107, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #gameOver button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            font-size: 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        #gameOver button:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        /* MENÚ PRINCIPAL */
+        #mainMenu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .menu-container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 50px;
+            border-radius: 20px;
+            border: 3px solid #FFD700;
+        }
+
+        .menu-title {
+            font-size: 60px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+        }
+
+        .menu-subtitle {
+            font-size: 20px;
+            color: #FF6B6B;
+            margin-bottom: 40px;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .menu-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #FFD700;
+            background: #4CAF50;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 200px;
+        }
+
+        .menu-btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+        }
+
+        .menu-info {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #87CEEB;
+            max-width: 400px;
+        }
+
+        .instructions {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .instructions h3 {
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            color: #E0E0E0;
+            margin: 5px 0;
+        }
+
+        #instructionsModal {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2100;
+        }
+
+        .instructions-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            border: 3px solid #FFD700;
+            max-width: 500px;
+            color: white;
+        }
+
+        .instructions-content h2 {
+            color: #FFD700;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .instructions-content p {
+            color: #E0E0E0;
+            margin: 12px 0;
+            line-height: 1.6;
+        }
+
+        .instructions-content button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .instructions-content button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <!-- MENÚ PRINCIPAL -->
+    <div id="mainMenu">
+        <div class="menu-container">
+            <div class="menu-title">⬆️ JUMP KING ⬆️</div>
+            <div class="menu-subtitle">¡Salta hacia la victoria!</div>
+            
+            <div class="menu-buttons">
+                <button class="menu-btn" onclick="startGame()">🎮 Jugar</button>
+                <button class="menu-btn" onclick="showInstructions()">📖 Instrucciones</button>
+            </div>
+            
+            <div class="menu-info">
+                <p>🏆 10 niveles de desafío creciente</p>
+                <p>🎨 Escenarios únicos y hermosos</p>
+                <p>🔊 Efectos de sonido épicos</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE INSTRUCCIONES -->
+    <div id="instructionsModal">
+        <div class="instructions-content">
+            <h2>📖 Instrucciones</h2>
+            <p><strong>Objetivo:</strong> Salta hacia arriba a través de todos los 10 niveles</p>
+            <p><strong>⬅️ Flecha Izquierda:</strong> Movimiento izquierda</p>
+            <p><strong>➡️ Flecha Derecha:</strong> Movimiento derecha</p>
+            <p><strong>ESPACIO / W:</strong> Saltar (solo desde plataformas)</p>
+            <p><strong>Tip:</strong> ¡Solo saltarás automáticamente al tocar una plataforma!</p>
+            <p><strong>⚠️ Si caes:</strong> Regresarás al nivel anterior</p>
+            <button onclick="closeInstructions()">Entendido ✓</button>
+        </div>
+    </div>
+
+    <div id="gameWrapper" style="display: none;">
+        <div id="hud">
+            <div class="hud-row">
+                <span class="hud-label">Nivel:</span>
+                <span class="hud-value" id="levelDisplay">1</span>
+            </div>
+
+        </div>
+        <div id="gameContainer">
+            <div id="player"></div>
+            <div id="gameOver">
+                <h1 id="gameOverTitle">¡GAME OVER!</h1>
+                <div id="finalScore">Altura final: 0m</div>
+                <div id="levelReached" style="font-size: 16px; margin: 10px 0;">Nivel alcanzado: 1</div>
+                <button onclick="goToMenu()">🏠 Menú Principal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio para saltos -->
+    <audio id="jumpSound" src="SonidoSalto.mp3" preload="auto"></audio>
+
+    <script>
+        // Configuración del juego
+        const gameContainer = document.getElementById('gameContainer');
+        const player = document.getElementById('player');
+        const levelDisplay = document.getElementById('levelDisplay');
+        const gameOverScreen = document.getElementById('gameOver');
+        const gameOverTitle = document.getElementById('gameOverTitle');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const levelReachedDisplay = document.getElementById('levelReached');
+        const jumpSound = document.getElementById('jumpSound');
+
+        // Propiedades del jugador
+        const playerSize = 60;
+        let playerX = 220;
+        let playerY = 650; // Posición inicial: encima de la plataforma inicial
+        let velocityY = 0;
+        let velocityX = 0;
+        const gravity = 0.6;
+        const jumpPower = 15;
+        const moveSpeed = 5;
+        let isOnGround = true; // Comienza en el suelo
+        let maxHeightReached = 0;
+        let gameActive = true;
+        let currentLevel = 1;
+        let totalScore = 0;
+        let bestHeight = 0; // Mejor altura alcanzada
+
+        // Plataformas
+        let platforms = [];
+        const platformWidth = 100;
+        const platformHeight = 20;
+
+        // Definir niveles fijos (como en Jump King)
+        const levelConfigs = [
+            { // Nivel 1 - Fácil (Adaptado a imagen)
+                platforms: [
+                    {x: 200, y: 693, width: 100, height: 20},  // Base centro - plataforma madera grande
+                    {x: 125, y: 573, width: 100, height: 20},  // Izquierda-centro - plataforma madera
+                    {x: 300, y: 467, width: 100, height: 20},  // Derecha-centro - bloques naranjas diagonales
+                    {x: 200, y: 360, width: 100, height: 20},  // Centro - plataforma madera
+                    {x: 100, y: 253, width: 100, height: 20},   // Izquierda superior - plataforma madera
+                    {x: 325, y: 147, width: 100, height: 20},  // Derecha superior - plataforma madera
+                ]
+            },
+            { // Nivel 2
+                platforms: [
+                    {x: 200, y: 693, width: 100, height: 20},
+                    {x: 150, y: 547, width: 100, height: 20},
+                    {x: 250, y: 440, width: 100, height: 20},
+                    {x: 100, y: 320, width: 100, height: 20},
+                    {x: 300, y: 200, width: 100, height: 20},
+                    {x: 200, y: 80, width: 100, height: 20},
+                ]
+            },
+            { // Nivel 3
+                platforms: [
+                    {x: 200, y: 693, width: 100, height: 20},
+                    {x: 50, y: 533, width: 100, height: 20},
+                    {x: 350, y: 413, width: 100, height: 20},
+                    {x: 175, y: 267, width: 100, height: 20},
+                    {x: 325, y: 133, width: 100, height: 20},
+                ]
+            },
+            { // Nivel 4
+                platforms: [
+                    {x: 200, y: 693, width: 100, height: 20},
+                    {x: 125, y: 520, width: 100, height: 20},
+                    {x: 325, y: 387, width: 100, height: 20},
+                    {x: 75, y: 240, width: 100, height: 20},
+                    {x: 300, y: 93, width: 100, height: 20},
+                ]
+            },
+            { // Nivel 5 - Mitad
+                platforms: [
+                    {x: 200, y: 693, width: 100, height: 20},
+                    {x: 350, y: 520, width: 100, height: 20},
+                    {x: 75, y: 400, width: 100, height: 20},
+                    {x: 250, y: 253, width: 100, height: 20},
+                    {x: 125, y: 107, width: 100, height: 20},
+                ]
+            },
+            { // Nivel 6
+                platforms: [
+                    {x: 200, y: 693, width: 100, height: 20},
+                    {x: 50, y: 520, width: 100, height: 20},
+                    {x: 300, y: 373, width: 100, height: 20},
+                    {x: 150, y: 227, width: 100, height: 20},
+                    {x: 350, y: 67, width: 100, height: 20},
+                ]
+            },
+            { // Nivel 7
+                platforms: [
+                    {x: 200, y: 693, width: 100, height: 20},
+                    {x: 325, y: 547, width: 100, height: 20},
+                    {x: 100, y: 413, width: 100, height: 20},
+                    {x: 300, y: 253, width: 100, height: 20},
+                    {x: 75, y: 107, width: 100, height: 20},
+                ]
+            },
+            { // Nivel 8
+                platforms: [
+                    {x: 200, y: 693, width: 100, height: 20},
+                    {x: 150, y: 547, width: 100, height: 20},
+                    {x: 325, y: 413, width: 100, height: 20},
+                    {x: 50, y: 267, width: 100, height: 20},
+                    {x: 275, y: 120, width: 100, height: 20},
+                ]
+            },
+            { // Nivel 9
+                platforms: [
+                    {x: 200, y: 693, width: 100, height: 20},
+                    {x: 350, y: 560, width: 100, height: 20},
+                    {x: 100, y: 427, width: 100, height: 20},
+                    {x: 250, y: 280, width: 100, height: 20},
+                    {x: 125, y: 133, width: 100, height: 20},
+                ]
+            },
+            { // Nivel 10 - Final y Difícil
+                platforms: [
+                    {x: 200, y: 693, width: 100, height: 20},
+                    {x: 50, y: 560, width: 100, height: 20},
+                    {x: 325, y: 440, width: 100, height: 20},
+                    {x: 125, y: 320, width: 100, height: 20},
+                    {x: 350, y: 200, width: 100, height: 20},
+                    {x: 75, y: 67, width: 100, height: 20},
+                ]
+            }
+        ];
+
+        // Crear plataformas por nivel
+        function generatePlatforms(level) {
+            platforms = [];
+            
+            // Obtener configuración del nivel (limitar a máximo 10)
+            const levelIndex = Math.min(level - 1, levelConfigs.length - 1);
+            const levelConfig = levelConfigs[levelIndex];
+            
+            // Copiar plataformas del nivel
+            platforms = levelConfig.platforms.map(p => ({...p}));
+            
+            // Plataforma grande solo en el nivel 1
+            if (currentLevel === 1) {
+                platforms.push({
+                    x: 50,
+                    y: 733,
+                    width: 400,
+                    height: 27
+                });
+            }
+
+            // Cambiar background según el nivel
+            gameContainer.className = `level${currentLevel}`;
+            
+            renderPlatforms();
+        }
+
+        // Renderizar plataformas
+        function renderPlatforms() {
+            document.querySelectorAll('.platform').forEach(p => p.remove());
+
+            platforms.forEach(platform => {
+                const platformDiv = document.createElement('div');
+                platformDiv.className = 'platform';
+                platformDiv.style.left = platform.x + 'px';
+                platformDiv.style.top = platform.y + 'px';
+                platformDiv.style.width = platform.width + 'px';
+                platformDiv.style.height = platform.height + 'px';
+                gameContainer.appendChild(platformDiv);
+            });
+        }
+
+        // Detección de colisiones mejorada
+        function checkCollisions() {
+            let onGround = false;
+
+            platforms.forEach(platform => {
+                // AABB Collision Detection
+                const playerLeft = playerX;
+                const playerRight = playerX + playerSize;
+                const playerTop = playerY;
+                const playerBottom = playerY + playerSize;
+
+                const platformLeft = platform.x;
+                const platformRight = platform.x + platform.width;
+                const platformTop = platform.y;
+                const platformBottom = platform.y + platform.height;
+
+                // Verificar si hay colisión
+                if (playerRight > platformLeft && playerLeft < platformRight &&
+                    playerBottom > platformTop && playerTop < platformBottom) {
+
+                    // Colisión desde arriba (el jugador cae sobre la plataforma)
+                    if (velocityY >= 0) {
+                        playerY = platformTop - playerSize;
+                        velocityY = 0;
+                        onGround = true;
+                    }
+                    // Colisión desde abajo
+                    else if (velocityY < 0 && playerTop < platformBottom + 10) {
+                        playerY = platformBottom;
+                        velocityY = 0;
+                    }
+                    // Colisión desde la izquierda
+                    else if (velocityX > 0) {
+                        playerX = platformLeft - playerSize;
+                        velocityX = 0;
+                    }
+                    // Colisión desde la derecha
+                    else if (velocityX < 0) {
+                        playerX = platformRight;
+                        velocityX = 0;
+                    }
+                }
+            });
+
+            isOnGround = onGround;
+
+            // Comprobar si cayó fuera de los límites
+            if (playerY > gameContainer.offsetHeight) {
+                if (currentLevel > 1) {
+                    // Bajar al nivel anterior
+                    prevLevel();
+                } else {
+                    // Game Over en el nivel 1
+                    endGame(false);
+                }
+            }
+
+            // Comprobar si llegó al tope (siguiente nivel)
+            if (playerY < 0) {
+                nextLevel();
+            }
+        }
+
+        // Saltar cuando el jugador presiona espacio
+        function jump() {
+            if (isOnGround) {
+                velocityY = -jumpPower;
+                isOnGround = false;
+                
+                // Reproducir sonido de salto
+                jumpSound.currentTime = 0;
+                jumpSound.play().catch(err => console.log('Sonido no disponible'));
+            }
+        }
+
+        // Actualizar posición del jugador
+        function updatePlayer() {
+            if (!gameActive) return;
+
+            // Aplicar gravedad
+            velocityY += gravity;
+
+            // Limitar velocidad máxima
+            if (velocityY > 20) velocityY = 20;
+
+            // Movimiento horizontal
+            velocityX = 0;
+            if (keys['ArrowLeft']) {
+                velocityX = -moveSpeed;
+            }
+            if (keys['ArrowRight']) {
+                velocityX = moveSpeed;
+            }
+
+            // Actualizar posición
+            playerX += velocityX;
+            playerY += velocityY;
+
+            // Envolvimiento de pantalla
+            if (playerX + playerSize < 0) {
+                playerX = gameContainer.offsetWidth;
+            }
+            if (playerX > gameContainer.offsetWidth) {
+                playerX = -playerSize;
+            }
+
+            // Registrar altura
+            const currentHeight = Math.max(0, 600 - playerY);
+            const levelHeight = currentHeight + (currentLevel - 1) * 600;
+            totalScore = Math.max(totalScore, levelHeight);
+            if (levelHeight > bestHeight) {
+                bestHeight = levelHeight;
+            }
+            
+            levelDisplay.textContent = currentLevel;
+
+            // Verificar colisiones
+            checkCollisions();
+
+            // Actualizar posición visual
+            player.style.left = playerX + 'px';
+            player.style.top = playerY + 'px';
+        }
+
+        // Controlar el juego
+        const keys = {};
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+
+            // Saltar con espacio
+            if (e.key === ' ' || e.key === 'w' || e.key === 'W') {
+                jump();
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // Siguiente nivel
+        function nextLevel() {
+            // Verificar si es el final del juego (nivel 10)
+            if (currentLevel >= 10) {
+                gameActive = false;
+                gameOverScreen.style.display = 'block';
+                gameOverTitle.textContent = '¡GANASTE! 🎉';
+                finalScoreDisplay.textContent = `¡Completaste todos los 10 niveles!`;
+                levelReachedDisplay.textContent = `Dificultad Final: Nivel 10`;
+                return;
+            }
+            
+            // Cambio instantáneo de nivel
+            currentLevel++;
+            playerX = 185;
+            playerY = 490;
+            velocityY = 0;
+            velocityX = 0;
+            isOnGround = true;
+            generatePlatforms(currentLevel);
+        }
+
+        // Nivel anterior
+        function prevLevel() {
+            if (currentLevel > 1) {
+                // Cambio instantáneo de nivel
+                currentLevel--;
+                playerX = 185;
+                playerY = 490;
+                velocityY = 0;
+                velocityX = 0;
+                isOnGround = true;
+                generatePlatforms(currentLevel);
+            }
+        }
+
+        // Game Over
+        function endGame(won = false) {
+            gameActive = false;
+            gameOverScreen.style.display = 'block';
+            finalScoreDisplay.textContent = `Altura final: ${Math.floor(totalScore / 20)}m`;
+            levelReachedDisplay.textContent = `Nivel alcanzado: ${currentLevel}`;
+            if (won) {
+                gameOverTitle.textContent = '¡GANASTE!';
+            } else {
+                gameOverTitle.textContent = '¡GAME OVER!';
+            }
+        }
+
+        // Loop del juego
+        function gameLoop() {
+            updatePlayer();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Inicializar juego
+        generatePlatforms(currentLevel);
+        isOnGround = true;
+        gameLoop();
+
+        // ============ FUNCIONES DEL MENÚ ============
+        function startGame() {
+            // Reiniciar variables del juego
+            currentLevel = 1;
+            playerX = 185;
+            playerY = 490;
+            velocityY = 0;
+            velocityX = 0;
+            isOnGround = true;
+            gameActive = true;
+            bestHeight = 0;
+            totalScore = 0;
+            
+            // Mostrar juego, ocultar menú
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('gameWrapper').style.display = 'flex';
+            document.getElementById('gameOver').style.display = 'none';
+            
+            // Generar primer nivel
+            generatePlatforms(currentLevel);
+            updateHUD();
+        }
+
+        function showInstructions() {
+            document.getElementById('instructionsModal').style.display = 'flex';
+        }
+
+        function closeInstructions() {
+            document.getElementById('instructionsModal').style.display = 'none';
+        }
+
+        function goToMenu() {
+            // Resetear juego
+            gameActive = false;
+            
+            // Ocultar juego, mostrar menú
+            document.getElementById('gameWrapper').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'flex';
+            document.getElementById('instructionsModal').style.display = 'none';
+        }
+
+        function updateHUD() {
+            levelDisplay.textContent = currentLevel;
+        }
+
+        // Instrucciones en consola
+        console.log('✓ Juego iniciado');
+        console.log('Abre el menú para empezar a jugar');
+    </script>
+</body>
+</html>

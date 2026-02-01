@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jump King</title>
+    <link rel="stylesheet" href="src/css/style.css">
+</head>
+<body>
+    <!-- MENÚ PRINCIPAL -->
+    <div id="mainMenu">
+        <div class="menu-container">
+            <div class="menu-title">⬆️ JUMP KING ⬆️</div>
+            <div class="menu-subtitle">¡Salta hacia la victoria!</div>
+            
+            <div class="menu-buttons">
+                <button class="menu-btn" onclick="startGame()">🎮 Jugar</button>
+                <button class="menu-btn" onclick="showInstructions()">📖 Instrucciones</button>
+            </div>
+            
+            <div class="menu-info">
+                <p>🏆 10 niveles de desafío creciente</p>
+                <p>🎨 Escenarios únicos y hermosos</p>
+                <p>🔊 Efectos de sonido épicos</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE INSTRUCCIONES -->
+    <div id="instructionsModal">
+        <div class="instructions-content">
+            <h2>📖 Instrucciones</h2>
+            <p><strong>Objetivo:</strong> Salta hacia arriba a través de todos los 10 niveles</p>
+            <p><strong>⬅️ Flecha Izquierda:</strong> Movimiento izquierda</p>
+            <p><strong>➡️ Flecha Derecha:</strong> Movimiento derecha</p>
+            <p><strong>ESPACIO / W:</strong> Saltar (solo desde plataformas)</p>
+            <p><strong>Tip:</strong> ¡Solo saltarás automáticamente al tocar una plataforma!</p>
+            <p><strong>⚠️ Si caes:</strong> Regresarás al nivel anterior</p>
+            <button onclick="closeInstructions()">Entendido ✓</button>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR DEL JUEGO -->
+    <div id="gameWrapper" style="display: none;">
+        <!-- HUD (Información del juego) -->
+        <div id="hud">
+            <div class="hud-row">
+                <span class="hud-label">Nivel:</span>
+                <span class="hud-value" id="levelDisplay">1</span>
+            </div>
+        </div>
+
+        <!-- Contenedor principal del juego -->
+        <div id="gameContainer">
+            <div id="player"></div>
+            <div id="gameOver">
+                <h1 id="gameOverTitle">¡GAME OVER!</h1>
+                <div id="finalScore">Altura final: 0m</div>
+                <div id="levelReached" style="font-size: 16px; margin: 10px 0;">Nivel alcanzado: 1</div>
+                <button onclick="goToMenu()">🏠 Menú Principal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio para saltos -->
+    <audio id="jumpSound" src="src/assets/SonidoSalto.mp3" preload="auto"></audio>
+
+    <!-- Scripts -->
+    <script src="src/js/game.js"></script>
+    <script src="src/js/ui.js"></script>
+</body>
+</html>
